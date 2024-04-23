@@ -22,6 +22,7 @@ import semantic_version
 
 from platformio import fs, util
 from platformio.cli import PlatformioCLI
+from platformio.project.config import ProjectConfig
 from platformio.compat import ci_strings_are_equal
 from platformio.package.exception import ManifestException, MissingPackageManifestError
 from platformio.package.lockfile import LockFile
@@ -62,6 +63,7 @@ class BasePackageManager(  # pylint: disable=too-many-public-methods,too-many-in
     def __init__(self, pkg_type, package_dir, compatibility=None):
         self.pkg_type = pkg_type
         self.package_dir = package_dir
+        self.core_dir = ProjectConfig.get_instance().get("platformio", "core_dir")
         self.compatibility = compatibility
         self.log = self._setup_logger()
 
@@ -93,9 +95,9 @@ class BasePackageManager(  # pylint: disable=too-many-public-methods,too-many-in
     def lock(self):
         if self._lockfile:
             return
-        self.ensure_dir_exists(os.path.dirname(self.package_dir))
-        self._lockfile = LockFile(self.package_dir)
-        self.ensure_dir_exists(self.package_dir)
+        self.ensure_dir_exists(os.path.dirname(self.core_dir))
+        self._lockfile = LockFile(self.core_dir)
+        self.ensure_dir_exists(self.core_dir)
         self._lockfile.acquire()
 
     def unlock(self):
